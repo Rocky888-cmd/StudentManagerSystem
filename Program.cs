@@ -1,25 +1,50 @@
 using System;
+using System.Text.RegularExpressions;
 
 class Program
 {
     static void Main()
     {
-        Console.Write("How many students do you want to enter? ");
-        int studentCount = int.Parse(Console.ReadLine());
+        int studentCount;
+        while (true)
+        {
+            Console.Write("How many students do you want to enter? ");
+            if (int.TryParse(Console.ReadLine(), out studentCount) && studentCount > 0)
+                break;
+            Console.WriteLine("Please enter a valid number greater than 0.");
+        }
 
         string[] names = new string[studentCount];
-        int[,] grades = new int[studentCount, 5]; // 2D array: [student, grade]
+        int[,] grades = new int[studentCount, 5];
 
-        // Input student names and grades
         for (int i = 0; i < studentCount; i++)
         {
-            Console.Write($"\nEnter name of student {i + 1}: ");
-            names[i] = Console.ReadLine();
+            // Validate name
+            while (true)
+            {
+                Console.Write($"\nEnter name of student {i + 1}: ");
+                string inputName = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(inputName) && Regex.IsMatch(inputName, @"^[a-zA-Z\s]+$"))
+                {
+                    names[i] = inputName;
+                    break;
+                }
+                Console.WriteLine("Invalid name. Use letters only.");
+            }
 
+            // Validate grades
             for (int g = 0; g < 5; g++)
             {
-                Console.Write($"Enter grade {g + 1} for {names[i]}: ");
-                grades[i, g] = int.Parse(Console.ReadLine());
+                while (true)
+                {
+                    Console.Write($"Enter grade {g + 1} for {names[i]} (65–100): ");
+                    if (int.TryParse(Console.ReadLine(), out int grade) && grade >= 65 && grade <= 100)
+                    {
+                        grades[i, g] = grade;
+                        break;
+                    }
+                    Console.WriteLine("Invalid grade. Enter a number between 65 and 100.");
+                }
             }
         }
 
@@ -88,21 +113,26 @@ class Program
             else if (choice == "4")
             {
                 Console.Write("\nEnter grade to search: ");
-                int searchGrade = int.Parse(Console.ReadLine());
-                bool found = false;
-
-                for (int i = 0; i < studentCount; i++)
+                if (int.TryParse(Console.ReadLine(), out int searchGrade))
                 {
-                    for (int g = 0; g < 5; g++)
+                    bool found = false;
+                    for (int i = 0; i < studentCount; i++)
                     {
-                        if (grades[i, g] == searchGrade)
+                        for (int g = 0; g < 5; g++)
                         {
-                            Console.WriteLine($"{searchGrade} found for {names[i]}");
-                            found = true;
+                            if (grades[i, g] == searchGrade)
+                            {
+                                Console.WriteLine($"{searchGrade} found for {names[i]}");
+                                found = true;
+                            }
                         }
                     }
+                    if (!found) Console.WriteLine("Grade not found.");
                 }
-                if (!found) Console.WriteLine("Grade not found.");
+                else
+                {
+                    Console.WriteLine("Invalid input. Enter a number.");
+                }
             }
             else if (choice == "5")
             {
